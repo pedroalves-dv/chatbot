@@ -44,6 +44,7 @@ const Featured = () => {
       const gmtPart = parts.find(part => part.type === "timeZoneName");
       setGmtOffset(gmtPart.value);
 
+      // const res = await fetch(`/api/business-hours`);
       const res = await fetch(`/api/business-hours?lat=${latitude}&lon=${longitude}`);
       if (!res.ok) throw new Error("Failed to fetch business hours");
 

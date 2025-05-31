@@ -1,92 +1,144 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
+// Helper Function: Format display name to show city and country
+function formatDisplayName(display_name) {
+  if (!display_name) return "";
+  const parts = display_name.split(",");
+  const trimmed = parts.map((p) => p.trim()).filter(Boolean);
+  // Show first and last part (city and country)
+  if (trimmed.length >= 2) {
+    return `${trimmed[0]}, ${trimmed[trimmed.length - 1]}`;
+  }
+  return trimmed[0] || "";
+}
 
 export default function SearchBar({ onSearch }) {
-  const [input, setInput] = useState("");
+  const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [isFocused, setIsFocused] = useState(false); // Track focus state
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const containerRef = useRef(null);
 
-  // Fetch location suggestions based on input
+  // Fetch suggestions from Nominatim
+  const fetchSuggestions = async (searchText) => {
+    if (searchText.length < 2) return;
+    setIsLoading(true);
+
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+          searchText
+        )}&format=json&addressdetails=1`,
+        {
+          headers: {
+            "User-Agent": "Meridian Time App (contact@yourdomain.com)",
+          },
+        }
+      );
+      const data = await res.json();
+
+      // Filter unique display_name
+      const unique = [];
+      const seen = new Set();
+      for (const item of data) {
+        if (!seen.has(item.display_name)) {
+          unique.push(item);
+          seen.add(item.display_name);
+        }
+        if (unique.length >= 5) break;
+      }
+      setSuggestions(unique);
+
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Show suggestions when input is focused
+  const handleFocus = () => {
+    setShowSuggestions(true);
+  };
+
+  // Hide suggestions when clicking outside
   useEffect(() => {
-    if (input.length < 2) {
-      setSuggestions([]); // Clear suggestions if input is too short
-      return;
+    function handleClickOutside(event) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Debounce fetchSuggestions
+  useEffect(() => {
+    const debounce = setTimeout(() => fetchSuggestions(query), 300);
+    return () => clearTimeout(debounce);
+  }, [query, showSuggestions]);
+
+  // Handle suggestion selection
+  const handleSelect = async (result) => {
+    if (!result.lat || !result.lon) return;
+
+    // Fetch timezone using lat/lon
+    try {
+      const tzRes = await fetch(
+        `https://api.timezonedb.com/v2.1/get-time-zone?key=${process.env.NEXT_PUBLIC_TIMEZONE_DB_API_KEY}&format=json&by=position&lat=${result.lat}&lng=${result.lon}`
+      );
+      const tzData = await tzRes.json();
+      if (!tzData.zoneName) throw new Error("Timezone not found");
+
+      onSearch({
+        timezone: tzData.zoneName, // e.g., "Europe/Lisbon"
+        identifier: `${result.lat},${result.lon}`,
+        city: result.display_name,
+        lat: result.lat,
+        lon: result.lon
+      });
+    } catch (err) {
+      alert("Could not fetch timezone for this location.");
     }
 
-    const fetchSuggestions = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `https://api.timezonedb.com/v2.1/list-time-zone?key=${process.env.NEXT_PUBLIC_TIMEZONE_DB_API_KEY}&format=json&zone=${input}`
-        );
-        if (!res.ok) throw new Error("Failed to fetch suggestions");
-
-        const data = await res.json();
-        console.log("🌍 Raw API Response:", data);
-
-        if (!data.zones || data.zones.length === 0) {
-          console.log(setError("No results found"));
-          setSuggestions([]);
-        } else {
-          setError("");
-          const uniqueSuggestions = data.zones.map((zone) => ({
-            label: `${zone.countryName}, ${zone.zoneName}`,
-            timezone: zone.zoneName,
-          }));
-
-          console.log("✅ Filtered Suggestions:", uniqueSuggestions);
-          setSuggestions(uniqueSuggestions);
-        }
-      } catch (err) {
-        console.error("❌ Search error:", err);
-        setError("Error fetching suggestions");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const debounceTimeout = setTimeout(() => {
-      fetchSuggestions();
-    }, 500); // Delay to prevent API spam
-
-    return () => clearTimeout(debounceTimeout);
-  }, [input]);
-
-  // Handle selection
-  const handleSelect = (place) => {
-    setInput(""); // Clear the input
+    setQuery('');
     setSuggestions([]);
-    onSearch(place.timezone); // Pass the timezone to the onSearch function
-    setIsFocused(false); // Hide dropdown after selecting
+    setShowSuggestions(false);
   };
 
   return (
-    <div className="search-bar">
+    <div className="header" ref={containerRef}>
       <nav className="logo">Meridian</nav>
 
       <div className="search-container">
         <input
           className="search-input"
-          type="text"
-          placeholder="Country, City, or Timezone"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onFocus={() => setIsFocused(true)} // Show dropdown on focus
-          onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Hide dropdown with delay for click support
+          value={query}
+          onChange={(e) => {
+    setQuery(e.target.value);
+    if (e.target.value.trim() === "") {
+      setSuggestions([]);
+    }
+  }}
+          placeholder="Search city or timezone..."
+          onFocus={handleFocus}
         />
-        <button className="search-button" onClick={() => onSearch(input)}>
-          →
-        </button>
-        {/* Dropdown suggestions */}
-        {error && <p className="error-text">{error}</p>}
-        {suggestions.length > 0 && isFocused && (
-          <ul className={`suggestions-dropdown ${suggestions.length ? "visible" : ""}`}>
-            {suggestions.map((place, index) => (
-              <li key={index} onClick={() => handleSelect(place)}>
-                {place.label}
+
+        {/* {isLoading && <div className="loading-indicator">Searching...</div>} */}
+        {showSuggestions && suggestions.length > 0 && (
+          <ul className="suggestions-dropdown visible">
+            {suggestions.map((result, index) => (
+              <li
+                key={index}
+                onClick={() => handleSelect(result)}
+                className="suggestion-item"
+              >
+                {formatDisplayName(result.display_name)}
               </li>
             ))}
           </ul>
