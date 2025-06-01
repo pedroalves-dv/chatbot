@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Meridian
+
+Meridian is a modern web app for exploring world time zones, local times, and business hours for cities around the globe. Built with Next.js, it lets you search for any city, view its current local time, and see at a glance whether common types of businesses (offices, shops, restaurants, bars, public transport) are open or closed right now.
+
+## Features
+
+- 🌍 **Search any city** to instantly see its local time and timezone.
+- 🕒 **Live time display** that updates every second.
+- 🏢 **Business hours overview** for each location, showing if offices, shops, bars, restaurants, and public transport are open.
+- 🗂️ **Dashboard** add/remove timezones in your dashboard to customize it
+- ⭐ **Save favorite timezones** (WPI)
+- 🔒 **Google Sign-In** (WPI)
+- 🌗 **Dark mode toggle** for comfortable viewing.
+- ⚡ **Fast, responsive UI** (WPI)
 
 ## Getting Started
 
-First, run the development server:
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/your-username/meridian.git
+cd meridian
+npm install
+```
+
+Create a `.env.local` file in the root directory and add your API keys:
+```
+NEXT_PUBLIC_TIMEZONE_DB_API_KEY=your_timezone_db_api_key
+NEXT_PUBLIC_GEONAMES_USERNAME=your_geonames_username
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Usage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Use the search bar to find any city or timezone.
+- Click a suggestion to add it to your dashboard.
+- View live local time and business status for each saved location.
+- Sign in with Google for a personalized experience.
+- Toggle dark mode using the sun/moon icon.
 
-## Learn More
+## Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- [Next.js](https://nextjs.org)
+- [React](https://react.dev)
+- [NextAuth.js](https://next-auth.js.org) for authentication
+- [TimezoneDB](https://timezonedb.com/) , [GeoNames](https://www.geonames.org/) and [Nominatim](https://nominatim.org/) APIs
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+MIT
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Built with ❤️ using Next.js.
