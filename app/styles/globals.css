@@ -2,22 +2,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Armata&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1a1a1a;
-    --foreground: #ededed;
-  }
-}
-
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+}
+
+:root {
+  --background: #ededed;
+  --mid: #ffffff;
+  --text: #202020;
+}
+
+.dark-mode {
+  --background: #202020;
+  --mid: #464646;
+  --text: #ededed;
 }
 
 html,
@@ -27,7 +27,7 @@ body {
 }
 
 body {
-  color: var(--foreground);
+  color: var(--text);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
   /* font-family: "DM Sans", serif; */
@@ -42,65 +42,110 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-}
 
 /* ----------------------------------------------------------------------- */
 /* Header */
-
-.logo {
-  font-size: 1rem;
-  font-family: "Armata", serif;
-  font-optical-sizing: auto;
-  letter-spacing: -1px;
-}
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 2rem;
-  border: 1px solid red
+  /* border: 1px solid red */
+}
+
+.logo {
+  color: var(--text);
+  font-size: .9rem;
+  font-family: "Armata", serif;
+  letter-spacing: -1px;
+}
+
+.dark-mode-toggle {
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-size: .9rem;
+  font-family: "Armata", serif;
+  letter-spacing: -1px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.right-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.sign-in {
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-size: .9rem;
+  font-family: "Armata", serif;
+  letter-spacing: -1px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.account-icon {
+  color: var(--text);
+  display: inline-flex;
 }
 
 .search-container {
+  color: var(--text);
+  background-color: var(--mid);
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 5rem; 
+  border-radius: 5px; 
   width: 45rem;
-  /* padding: .4rem .4rem .4rem 1.5rem; */
   height: 2.7rem;
   margin: .8rem;
-  background-color: black;
- 
-   /* border: 2px solid #ccc; */
 }
 
 .suggestions-dropdown {
+  color: var(--text);
+  background-color: var(--mid);
   position: absolute;
-  background-color: black; 
+  /* background-color: black;  */
   z-index: 1000;
-  top: 110%; /* Ensure dropdown starts exactly below input */
+  top: 110%;
   left: 0;
-  width: 100%; /* Make sure it matches the input width */
-  border-radius: 20px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  border-radius: 5px;
+  /* box-shadow: 0px 5px 10px 0px var(--text); */
   opacity: 0;
   visibility: hidden;
   overflow: visible;
-  
- 
+  display: flex;
+  flex-direction: column;
+  padding: 3px;
+
 }
 
 .suggestions-dropdown li {
   list-style: none;
   cursor: pointer;
   padding: .5rem 1rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
 }
 
 .suggestions-dropdown li:first-child {
@@ -112,15 +157,15 @@ a {
 } 
 
 .suggestions-dropdown li:hover {
-  background: #272727;
-  /* color: black; */
+  background-color: var(--background);
+  border-radius: 4px;
+  
 }
 
 .suggestions-dropdown.visible {
   opacity: 1;
   transform: translateY(0);
   visibility: visible;
-  /* border: 1px solid white; */
 }
 
 .search-input {
@@ -128,21 +173,23 @@ a {
   padding: 0 1rem;
   font-size: 1.1rem;
   border: none;
-  border-radius: 30px;
+  border-radius: 5px;
   width: 100%;
   height: 100%;
-  background-color: black;
-
+  background-color: var(--mid);
+  color: var(--text);
 }
 
 
-.search-button:hover {
+/* .search-button:hover {
   border: 1px solid #707070;
-}
+  border-radius: 5px;
+} */
 
 .search-input:focus {
   outline: none;
-  border: 1px solid white;
+  border: 1px solid var(--text);
+  border-radius: 5px;
 }
 
 
@@ -151,87 +198,86 @@ a {
 /* Featured Container */
 
 .featured-container {
-  padding: 32px;
+  padding:  20px 32px;
   display: flex;
   justify-content: space-between;
   align-items: start;
   margin-top: 2rem;
-  /* border-bottom: 1px solid #ccc; */
-  border: 1px solid greenyellow;
-  margin-bottom: 20px;
+  border-bottom: 1px solid var(--text);
 }
 
+
 .featured-time {
-  position: relative;
   font-size: 5rem;
 }
 
 
-.pm {
-  position: absolute;
-  top: 0;
-  left: 295px;
-  border: 1px solid greenyellow
-}
-
 /* ----------------------------------------------------------------------- */
 /* Categories */
+
+.categories-container {
+  font-size: .9rem;
+  line-height: 1.2rem;
+}
 
 .category {
   margin-bottom: .2rem;
   margin-right: 3rem;
-  position: relative;
-  font-size: 1.1rem;
-  border: 1px solid greenyellow
+  /* border: 1px solid greenyellow */
 }
 
 .open {
-  position: absolute;
-  background-color: #4caf50; /* Green */
-  color: white;
+  background-color: #4caf50;
+  color: var(--mid);
   font-size: .6rem;
   border-radius: 5rem;
-  padding: .1rem .3rem;
+  padding: 3px 7px;
   margin-left: .4rem;
-  margin-top: .2rem;
 }
 
 .closed {
-  position: absolute;
-  background-color: #d32f2f; /* Red */
-  color: white;
+  background-color: #d32f2f;
+  color: var(--mid);
   font-size: .6rem;
-  border-radius: 5rem;
-  padding: .1rem .3rem;
+  border-radius: 15px;
+  padding: 3px 8px;
   margin-left: .4rem;
-  margin-top: .2rem;
+ 
 }
+
+
 /* ======================================================================= */
 /* Timezone List */
 
 .timezone-list {
   width: 100%;
-  border: 1px solid pink;
+  /* border: 1px solid pink; */
 }
+
+
 /* ----------------------------------------------------------------------- */
 /* Timezone Cards */
 
 .timezone-card {
-  padding: 32px;
+  border-bottom: 1px solid var(--text);
+  padding:  20px 32px;
   display: flex;
   justify-content: space-between;
   align-items: start;
-  border: 1px solid blue;
   margin-bottom: 20px;
 }
 
 .card-header {
-
   width: 50%;
+}
+
+.gmt, .date-display {
+  margin-left: 45px;
 }
 
 .time-display {
  font-size: 5rem;
+ margin-left: -5px;
 }
 
 .card-actions {
@@ -241,9 +287,17 @@ a {
 }
 
 .remove-button {
-  font-size: .7rem;
-  padding: 5px 8px;;
+  background-color: var(--text);
+  color: var(--mid);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-size: .9rem;
+  font-family: "Armata", serif;
+  letter-spacing: -1px;
+  padding: 2px 5px;
+  border-radius: 3px;
   border: 1px solid transparent;
-  border-radius: 20px;;
   cursor: pointer;
 }

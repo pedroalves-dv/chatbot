@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { signIn, signOut, useSession } from "next-auth/react";
+import Link from "next/link";
+import { FaUserCircle } from "react-icons/fa";
+import { MdLightMode, MdDarkMode  } from "react-icons/md";
 
+// -----------------------------------------------------------------------
 // Helper Function: Format display name to show city and country
 function formatDisplayName(display_name) {
   if (!display_name) return "";
@@ -20,7 +25,16 @@ export default function SearchBar({ onSearch }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const containerRef = useRef(null);
+  const [darkMode, setDarkMode] = useState(false);
 
+  // -----------------------------------------------------------------------
+  // Dark Mode Toggle
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => !prev);
+    document.documentElement.classList.toggle("dark-mode", !darkMode);
+  };
+
+  // -----------------------------------------------------------------------
   // Fetch suggestions from Nominatim
   const fetchSuggestions = async (searchText) => {
     if (searchText.length < 2) return;
@@ -50,7 +64,6 @@ export default function SearchBar({ onSearch }) {
         if (unique.length >= 5) break;
       }
       setSuggestions(unique);
-
     } catch (error) {
       console.error("Search error:", error);
     } finally {
@@ -58,11 +71,13 @@ export default function SearchBar({ onSearch }) {
     }
   };
 
+  // -----------------------------------------------------------------------
   // Show suggestions when input is focused
   const handleFocus = () => {
     setShowSuggestions(true);
   };
 
+  // -----------------------------------------------------------------------
   // Hide suggestions when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
@@ -77,16 +92,19 @@ export default function SearchBar({ onSearch }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // -----------------------------------------------------------------------
   // Debounce fetchSuggestions
   useEffect(() => {
     const debounce = setTimeout(() => fetchSuggestions(query), 300);
     return () => clearTimeout(debounce);
   }, [query, showSuggestions]);
 
+  // -----------------------------------------------------------------------
   // Handle suggestion selection
   const handleSelect = async (result) => {
     if (!result.lat || !result.lon) return;
 
+    // -----------------------------------------------------------------------
     // Fetch timezone using lat/lon
     try {
       const tzRes = await fetch(
@@ -100,36 +118,39 @@ export default function SearchBar({ onSearch }) {
         identifier: `${result.lat},${result.lon}`,
         city: result.display_name,
         lat: result.lat,
-        lon: result.lon
+        lon: result.lon,
       });
     } catch (err) {
       alert("Could not fetch timezone for this location.");
     }
 
-    setQuery('');
+    setQuery("");
     setSuggestions([]);
     setShowSuggestions(false);
   };
 
+  const { data: session } = useSession();
+
   return (
     <div className="header" ref={containerRef}>
-      <nav className="logo">Meridian</nav>
-
+      <div className="left-nav">
+        <Link href="/" className="logo">
+          Meridian
+        </Link>
+      </div>
       <div className="search-container">
         <input
           className="search-input"
           value={query}
           onChange={(e) => {
-    setQuery(e.target.value);
-    if (e.target.value.trim() === "") {
-      setSuggestions([]);
-    }
-  }}
+            setQuery(e.target.value);
+            if (e.target.value.trim() === "") {
+              setSuggestions([]);
+            }
+          }}
           placeholder="Search city or timezone..."
           onFocus={handleFocus}
         />
-
-        {/* {isLoading && <div className="loading-indicator">Searching...</div>} */}
         {showSuggestions && suggestions.length > 0 && (
           <ul className="suggestions-dropdown visible">
             {suggestions.map((result, index) => (
@@ -145,9 +166,29 @@ export default function SearchBar({ onSearch }) {
         )}
       </div>
 
-      <nav>
-        <a>Sign In</a>
-      </nav>
+      <div className="right-nav">
+      {session ? (
+        <div className="sign-in">
+          <span className="account-icon" title={session.user.name}>
+            <FaUserCircle size={25} />
+          </span>
+          <button className="sign-in" onClick={() => signOut()}>
+            Sign Out
+          </button>
+        </div>
+      ) : (
+        <button className="sign-in" onClick={() => signIn("google")}>
+          Sign In
+        </button>
+      )}
+      <button
+          className="dark-mode-toggle"
+          onClick={toggleDarkMode}
+          aria-label="Toggle dark mode"
+        >
+          {darkMode ? <MdDarkMode size={18} /> : <MdLightMode  size={18} />}
+        </button>
+    </div>
     </div>
   );
 }
